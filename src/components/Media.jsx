@@ -7,13 +7,19 @@ function Media({ item: { title, description, mediaType, href, url } }) {
 
     // Render media information
     return (
-        <>
-            <h3>{title}</h3>
-            <p>{description}</p>
-            <p>{href}</p>
-            <small>{mediaType}</small>
-            {mediaComponent}
-        </>
+
+        <article>
+            <header>
+                <h2>{title}</h2>
+                <p>{mediaType}</p>
+            </header>
+            <section>
+                <p>{description}</p>
+                <p>{href}</p>
+                {mediaComponent}
+            </section>
+        </article>
+
     );
 }
 

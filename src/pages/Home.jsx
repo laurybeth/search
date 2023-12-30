@@ -10,24 +10,33 @@ function Home() {
   const [sortOrder, setSortOrder] = useState('asc');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMediaType, setSelectedMediaType] = useState(null);
-
+  const [loading, setLoading] = useState(false); 
   // Asynchronous function to fetch results and update the state
   const fetchData = async () => {
-    if (query) {
-      let items;
-
-      // Determine if filtering by media type is required
-      if (selectedMediaType) {
-        items = await searchByMediaType([selectedMediaType]);
-      } else {
-        // Get results without media type filter
-        items = await searchByQuery(query);
+    try {
+      setLoading(true); // Set loading to true before fetching data
+  
+      if (query) {
+        let items;
+  
+        // Determine if filtering by media type is required
+        if (selectedMediaType) {
+          items = await searchByMediaType([selectedMediaType]);
+        } else {
+          // Get results without media type filter
+          items = await searchByQuery(query);
+        }
+  
+        // Sort the results and update the state
+        const sortedItems = sortByTitle(items, sortOrder);
+        setResult(sortedItems);
+        setShowFilters(true);
       }
-
-      // Sort the results and update the state
-      const sortedItems = sortByTitle(items, sortOrder);
-      setResult(sortedItems);
-      setShowFilters(true);
+    } catch (error) {
+      // Handle errors here
+      console.error(`Error during data fetching or processing: ${error.message}`);
+    } finally {
+      setLoading(false); // Set loading to false after fetching data
     }
   };
 
@@ -81,6 +90,8 @@ function Home() {
             <button type="submit">Search</button>
           </form>
         </section>
+        {/* Show loading message while fetching data */}
+        {loading && <p>Loading...</p>}
         {/* Show filters and results if there are results */}
         {showFilters && result.length > 0 && (
           <aside>
@@ -134,6 +145,7 @@ function Home() {
             <Media key={index} item={element} />
           ))}
         </section>
+         {/* Show loading message at the end to avoid overlap */}
       </main>
     </>
   );
