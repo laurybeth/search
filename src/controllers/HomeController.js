@@ -1,12 +1,8 @@
-import { getData } from "../api/api";
+import { getData, getMediaType } from "../api/api";
 
-// Function to fetch and process data based on a query
-export const getResult = async (query) => {
-    // Fetch data using the provided query
-    const data = await getData(query);
-
+const processItems = (items) => {
     // Map and transform the data into a more usable format
-    const items = data.collection.items.map((item) => {
+    return items.map((item) => {
         // Destructure relevant properties from the item data
         const { title, description, media_type: mediaType, href } = item.data[0];
 
@@ -16,8 +12,34 @@ export const getResult = async (query) => {
         // Return an object with relevant properties
         return { title, description, mediaType, href, ...(url && { url }) };
     });
+};
 
-    return items;
+// Common function to fetch and process data based on a query
+const fetchData = async (query, fetchFunction) => {
+    try {
+        // Fetch data using the provided function
+        const data = await fetchFunction(query);
+
+        // Verify the presence of data.collection.items
+        if (!data.collection.items) {
+            return [];
+        }
+
+        // Process and return the items
+        return processItems(data.collection.items);
+    } catch (error) {
+        // Handle any errors during data fetching or processing
+        console.error(`Error during data fetching or processing: ${error.message}`);
+        return [];
+    }
+};
+
+export const searchByQuery = async (query) => {
+    return fetchData(query, getData);
+};
+
+export const searchByMediaType = async (mediaType) => {
+    return fetchData(mediaType, getMediaType);
 };
 
 // Function to sort items based on their title
